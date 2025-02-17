@@ -1,0 +1,82 @@
+version: '3.8'
+networks:
+  backend:
+    name: dev
+    driver: bridge
+
+volumes:
+  mysql_data:
+
+services:
+  portainer:
+    image: portainer/portainer-ce:latest
+    ports:
+      - 9443:9443
+      - 9000:9000
+    networks:
+      - backend
+    volumes:
+      #        - data:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
+
+  mysql:
+    image: mysql:latest
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: usersdb
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      retries: 3
+      timeout: 5s
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  redis:
+    image: redis:latest
+    restart: always
+    ports:
+      - "6366:6379"
+
+  user-service:
+    build: ./user-service
+    restart: always
+    depends_on:
+      - mysql
+      - rabbitmq
+      - redis
+    env_file:
+      - ./secret.env
+    environment:
+      NODE_APP_INSTANCE: 80
+    ports:
+      - "1900:80"
+    entrypoint: npm run start:prod
+
+  delay-worker:
+    build: ./notification-service
+    restart: always
+    depends_on:
+      - redis
+    env_file:
+      - ./secret.env
+    entrypoint: npm run start:prod
+
+  notification-service:
+    build: ./notification-service
+    restart: always
+    depends_on:
+      - rabbitmq
+    env_file:
+      - ./secret.env
+    entrypoint: npm run start:prod
