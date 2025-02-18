@@ -3,14 +3,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './users.entity';
 import { CreateUserDto } from './dto/users.create.dto';
-import { RabbitMQConfig } from '../../config/RabbitMQConfig';
 import { ClientProxy } from '@nestjs/microservices';
+import { config } from '../../config';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
-    @Inject(RabbitMQConfig.RABBITMQ_NOTIFICATION_DELAY_NAME)
+    @Inject(config.rabbitMQ.transport.notificationDelay)
     private rabbitClient: ClientProxy,
   ) {}
 
@@ -19,7 +19,7 @@ export class UserService {
     const saveData = await this.userRepository.save(user);
 
     if (saveData.id) {
-      this.rabbitClient.emit('send-delay-notification', {
+      this.rabbitClient.emit(config.emitEvent.sendDelayNotification, {
         userId: saveData.id,
         message: {
           title: `Hi ${saveData.name}`,

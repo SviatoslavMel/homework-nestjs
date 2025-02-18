@@ -1,14 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { MessageDto } from './dto/message.dto';
 
-import { RestConfig } from '../../config/RestConfig';
+import { config } from '../../config';
 
 @Injectable()
 export class NotificationService {
   async userNotification(message: MessageDto): Promise<any> {
-    console.log('message', `https://${RestConfig.NOTIFICATION_HOSTNAME}/${RestConfig.NOTIFICATION_PATH}`, message)
     await fetch(
-      `https://${RestConfig.NOTIFICATION_HOSTNAME}/${RestConfig.NOTIFICATION_PATH}`,
+      `https://${config.rest.notification.hostname}/${config.rest.notification.sendPath}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

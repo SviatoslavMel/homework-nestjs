@@ -4,24 +4,24 @@ import { ClientProxy } from '@nestjs/microservices';
 import { Inject } from '@nestjs/common';
 import { MessageDto } from './dto/message.dto';
 
-import { RedisConfig } from '../../config/RedisConfig';
-import { RabbitMQConfig } from '../../config/RabbitMQConfig';
+import { config } from '../../config';
 
-@Processor(RedisConfig.TASK_CREATE_USER.name)
+const { redis, rabbitMQ } = config;
+
+@Processor(redis.task.createUser.name)
 export class DelayProcessor extends WorkerHost {
   constructor(
-    @Inject(RabbitMQConfig.RABBITMQ_NOTIFICATION_DELAY_NAME)
+    @Inject(rabbitMQ.transport.notificationDelay)
     private rabbitClient: ClientProxy,
   ) {
     super();
   }
 
   process(job: Job): any {
-      console.log('job.name', job.name, RedisConfig.TASK_CREATE_USER.job, job.name === RedisConfig.TASK_CREATE_USER.job)
-    if (job.name === RedisConfig.TASK_CREATE_USER.name) {
+    if (job.name === redis.task.createUser.name) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const { userId, message }: MessageDto = job.data;
-      this.rabbitClient.emit(RedisConfig.TASK_CREATE_USER.job, {
+      this.rabbitClient.emit(redis.task.createUser.job, {
         userId,
         message,
       });

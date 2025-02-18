@@ -2,33 +2,36 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 
-import { DatabaseConfig } from '../../config/DatabaseConfig';
-import { RabbitMQConfig } from '../../config/RabbitMQConfig';
+import { config } from '../../config';
 
 import { User } from './users.entity';
 import { UserService } from './users.service';
 import { UserController } from './users.controller';
 
+const { database, rabbitMQ } = config;
+
 @Module({
   imports: [
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: DatabaseConfig.DB_HOST,
-      port: DatabaseConfig.DB_PORT,
-      username: DatabaseConfig.DB_USERNAME,
-      password: DatabaseConfig.DB_PASSWORD,
-      database: DatabaseConfig.DB_NAME,
+      host: database.host,
+      port: database.port,
+      username: database.userName,
+      password: database.userPassword,
+      database: database.database.users,
       synchronize: true,
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
     }),
     TypeOrmModule.forFeature([User]),
     ClientsModule.register([
       {
-        name: RabbitMQConfig.RABBITMQ_NOTIFICATION_DELAY_NAME,
+        name: rabbitMQ.transport.notificationDelay,
         transport: Transport.RMQ,
         options: {
-          urls: [RabbitMQConfig.RABBITMQ_URL],
-          queue: RabbitMQConfig.RABBITMQ_NOTIFICATION_DELAY_QUEUE,
+          urls: [
+            `amqp://${rabbitMQ.user}:${rabbitMQ.password}@${rabbitMQ.hostname}:${rabbitMQ.port}`,
+          ],
+          queue: rabbitMQ.queue.notificationsDelay,
           queueOptions: {
             durable: true,
           },
