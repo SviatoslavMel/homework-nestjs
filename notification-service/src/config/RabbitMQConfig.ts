@@ -19,6 +19,5 @@ export class RabbitMQConfig {
 
   public static readonly RABBITMQ_URL: string = `amqp://${this.RABBITMQ_USER}:${this.RABBITMQ_PASSWORD}@${this.RABBITMQ_HOSTNAME}:${this.RABBITMQ_PORT}`;
 
-  public static readonly RABBITMQ_NOTIFICATION_NAME: string =
-    'NOTIFICATION_SERVICE';
+  public static readonly RABBITMQ_NOTIFICATION_QUEUE: string = 'notifications';
 }

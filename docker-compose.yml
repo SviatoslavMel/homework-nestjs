@@ -8,18 +8,6 @@ volumes:
   mysql_data:
 
 services:
-  portainer:
-    image: portainer/portainer-ce:latest
-    ports:
-      - 9443:9443
-      - 9000:9000
-    networks:
-      - backend
-    volumes:
-      #        - data:/data
-      - /var/run/docker.sock:/var/run/docker.sock
-    restart: unless-stopped
-
   mysql:
     image: mysql:latest
     restart: always
@@ -46,15 +34,18 @@ services:
     image: redis:latest
     restart: always
     ports:
-      - "6366:6379"
+      - "6379:6379"
 
   user-service:
     build: ./user-service
     restart: always
     depends_on:
-      - mysql
-      - rabbitmq
-      - redis
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+      redis:
+        condition: service_started
     env_file:
       - ./secret.env
     environment:
@@ -64,10 +55,13 @@ services:
     entrypoint: npm run start:prod
 
   delay-worker:
-    build: ./notification-service
+    build: ./delay-worker
     restart: always
     depends_on:
-      - redis
+      rabbitmq:
+        condition: service_started
+      redis:
+        condition: service_started
     env_file:
       - ./secret.env
     entrypoint: npm run start:prod

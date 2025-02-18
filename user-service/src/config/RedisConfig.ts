@@ -5,7 +5,7 @@ export class RedisConfig {
     .required()
     .asString();
 
-  public static readonly REDIS_PORT: number = get('RABBITMQ_PORT')
+  public static readonly REDIS_PORT: number = get('REDIS_PORT')
     .required()
     .asPortNumber();
 }

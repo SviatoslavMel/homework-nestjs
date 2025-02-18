@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
-import { UsersModule } from './entities/users/users.modules';
+import { NotificationModules } from './entities/notification/notification.modules';
 
 @Module({
-  imports: [UsersModule],
+  imports: [NotificationModules],
 })
 export class AppModule {}

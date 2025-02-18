@@ -1,24 +1,22 @@
 import { Injectable } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
-import { RabbitMQConfig } from '../config/RabbitMQConfig';
-
-const DELAY_TIME: number = 60 * 100;
-// 24 * 60 * 60 * 1000; // 24 hours delay
+import { RedisConfig } from '../../config/RedisConfig';
+import { MessageDto } from './dto/message.dto';
 
 @Injectable()
 export class DelayService {
   constructor(
-    @InjectQueue(RabbitMQConfig.RABBITMQ_NOTIFICATION_DELAY_QUEUE)
+    @InjectQueue(RedisConfig.TASK_CREATE_USER.name)
     private notificationQueue: Queue,
   ) {}
 
-  async scheduleNotification(userId: number, message: string) {
+  async scheduleNotification(data: MessageDto) {
     await this.notificationQueue.add(
-      'sendNotification', // Job name
-      { userId, message },
+      RedisConfig.TASK_CREATE_USER.name, // Job name
+      data,
       {
-        delay: DELAY_TIME,
+        delay: RedisConfig.TASK_CREATE_USER.delay,
         attempts: 3, // Retry up to 3 times on failure
         removeOnComplete: true,
       },

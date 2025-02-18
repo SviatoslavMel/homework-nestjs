@@ -24,4 +24,6 @@ export class RabbitMQConfig {
 
   public static readonly RABBITMQ_NOTIFICATION_DELAY_QUEUE: string =
     'notifications_delay';
+
+  public static readonly RABBITMQ_NOTIFICATION_QUEUE: string = 'notifications';
 }

@@ -11,7 +11,7 @@ async function bootstrap() {
       transport: Transport.RMQ,
       options: {
         urls: [RabbitMQConfig.RABBITMQ_URL],
-        queue: 'notifications',
+        queue: RabbitMQConfig.RABBITMQ_NOTIFICATION_QUEUE,
       },
     },
   );

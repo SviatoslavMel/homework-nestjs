@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { DelayModule } from './delay/delay.module';
+import { DelayModule } from './entities/delay/delay.module';
 
 @Module({
   imports: [DelayModule],

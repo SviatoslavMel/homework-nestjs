@@ -19,10 +19,12 @@ export class UserService {
     const saveData = await this.userRepository.save(user);
 
     if (saveData.id) {
-      console.log('user-service saveData', saveData);
       this.rabbitClient.emit('send-delay-notification', {
         userId: saveData.id,
-        message: `${saveData.name}, congratulations with registration`,
+        message: {
+          title: `Hi ${saveData.name}`,
+          body: '🎉 your registration completed successfully',
+        },
       });
     }
 
